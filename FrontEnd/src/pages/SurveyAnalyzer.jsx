@@ -171,11 +171,18 @@ const SurveyAnalyzer = () => {
     setError(null);
 
     try {
+      // Prepare plots data with titles and descriptions
+      const plotsWithData = plots.map(plot => ({
+        title: plot.title || 'Untitled Plot',
+        description: plot.description || '',
+        data: plot.data
+      }));
+
       await axios.post(`${import.meta.env.VITE_BASE_URL}/survey-analyzer/analyses/`, {
         title: analysisTitle,
         author_name: authorName,
         description,
-        plots,
+        plots: plotsWithData,
       }, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
@@ -192,26 +199,110 @@ const SurveyAnalyzer = () => {
   };
 
   const publishAnalysis = async () => {
+    if (!analysisTitle || !authorName) {
+      setError('Please provide a title and author name for the analysis.');
+      return;
+    }
+
+    if (plots.length === 0) {
+      setError('Please create at least one plot before publishing.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/survey-analyzer/publish-analysis/`, {
-        analysis_id: csvUploadId,
-      }, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-          'Content-Type': 'application/json',
+      // First save the analysis if not already saved
+      const saveResponse = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/survey-analyzer/analyses/`,
+        {
+          title: analysisTitle,
+          author_name: authorName,
+          description,
+          plots: plots.map(plot => ({
+            title: plot.title || 'Untitled Plot',
+            description: plot.description || '',
+            data: plot.data
+          })),
         },
-      });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!saveResponse.data || !saveResponse.data.id) {
+        throw new Error('Failed to save analysis. Please try again.');
+      }
+
+      // Then publish the analysis to get the PDF
+      const publishResponse = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/survey-analyzer/publish-analysis/`,
+        { analysis_id: saveResponse.data.id },
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
+            'Content-Type': 'application/json',
+          },
+          responseType: 'blob'
+        }
+      );
+
+      // Check if the response is a PDF
+      if (publishResponse.headers['content-type'] !== 'application/pdf') {
+        // Try to parse the error message if it's not a PDF
+        const reader = new FileReader();
+        reader.onload = () => {
+          try {
+            const errorData = JSON.parse(reader.result);
+            setError(errorData.error || 'Failed to generate PDF. Please try again.');
+          } catch (e) {
+            setError('Failed to generate PDF. Please try again.');
+          }
+        };
+        reader.readAsText(publishResponse.data);
+        return;
+      }
+
+      // Create and download the PDF
+      const blob = new Blob([publishResponse.data], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = window.URL.createObjectURL(blob);
-      link.download = `${analysisTitle}.pdf`;
+      link.download = `${analysisTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
       link.click();
+      
+      // Clean up
+      window.URL.revokeObjectURL(link.href);
     } catch (err) {
       console.error('Error publishing analysis:', err);
-      setError('Failed to publish analysis. Please try again.');
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        if (err.response.data instanceof Blob) {
+          // Try to read the error message from the blob
+          const reader = new FileReader();
+          reader.onload = () => {
+            try {
+              const errorData = JSON.parse(reader.result);
+              setError(errorData.error || 'Failed to publish analysis. Please try again.');
+            } catch (e) {
+              setError('Failed to publish analysis. Please try again.');
+            }
+          };
+          reader.readAsText(err.response.data);
+        } else {
+          setError(err.response.data.error || 'Failed to publish analysis. Please try again.');
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        setError('No response from server. Please check your internet connection and try again.');
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

@@ -274,7 +274,18 @@ from .models import Analysis
 from .serializers import AnalysisSerializer
 from django.http import JsonResponse, HttpResponse
 from django.core.files.base import ContentFile
-import pdfkit
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
+import plotly.io as pio
+import base64
+from io import BytesIO
+import plotly.graph_objects as go
+
+# Configure plotly to use kaleido
+pio.kaleido.scope.mathjax = None
 
 class AnalysisView(APIView):
     permission_classes = [IsAuthenticated]
@@ -300,25 +311,118 @@ class PublishAnalysisView(APIView):
             return Response({"error": "Analysis ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
+            logger.info(f"Attempting to publish analysis with ID: {analysis_id}")
             analysis = Analysis.objects.get(id=analysis_id, user=request.user)
-            html_content = f"""
-            <html>
-            <head><title>{analysis.title}</title></head>
-            <body>
-                <h1>{analysis.title}</h1>
-                <p><strong>Author:</strong> {analysis.author_name}</p>
-                <p><strong>Date:</strong> {analysis.date}</p>
-                <p>{analysis.description}</p>
-                <h2>Plots</h2>
-                {''.join([f'<div><h3>{plot.get('title', 'Untitled')}</h3><p>{plot.get('description', '')}</p></div>' for plot in analysis.plots])}
-            </body>
-            </html>
-            """
-            pdf_file = pdfkit.from_string(html_content, False)
-            response = HttpResponse(pdf_file, content_type='application/pdf')
+            logger.info(f"Found analysis: {analysis.title}")
+            
+            # Create a BytesIO buffer to store the PDF
+            buffer = BytesIO()
+            
+            # Create the PDF document
+            doc = SimpleDocTemplate(
+                buffer,
+                pagesize=letter,
+                rightMargin=72,
+                leftMargin=72,
+                topMargin=72,
+                bottomMargin=72
+            )
+            
+            # Create styles
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                'CustomTitle',
+                parent=styles['Heading1'],
+                fontSize=24,
+                spaceAfter=30
+            )
+            heading_style = ParagraphStyle(
+                'CustomHeading',
+                parent=styles['Heading2'],
+                fontSize=18,
+                spaceAfter=20
+            )
+            normal_style = styles['Normal']
+            
+            # Create story (content) for the PDF
+            story = []
+            
+            # Add title
+            story.append(Paragraph(analysis.title, title_style))
+            story.append(Spacer(1, 12))
+            
+            # Add author and date
+            story.append(Paragraph(f"<b>Author:</b> {analysis.author_name}", normal_style))
+            story.append(Paragraph(f"<b>Date:</b> {analysis.date}", normal_style))
+            story.append(Spacer(1, 12))
+            
+            # Add description
+            if analysis.description:
+                story.append(Paragraph(analysis.description, normal_style))
+                story.append(Spacer(1, 24))
+            
+            # Add plots
+            story.append(Paragraph("Plots", heading_style))
+            story.append(Spacer(1, 12))
+            
+            logger.info(f"Processing {len(analysis.plots)} plots")
+            for i, plot in enumerate(analysis.plots):
+                try:
+                    logger.info(f"Processing plot {i+1}")
+                    if plot.get('data'):
+                        # Create plotly figure
+                        fig = go.Figure(
+                            data=plot['data']['data'],
+                            layout=plot['data']['layout']
+                        )
+                        
+                        # Update layout for better PDF export
+                        fig.update_layout(
+                            paper_bgcolor='white',
+                            plot_bgcolor='white',
+                            width=800,
+                            height=500,
+                            margin=dict(l=50, r=50, t=50, b=50)
+                        )
+                        
+                        logger.info("Converting plot to image using kaleido")
+                        img_bytes = pio.to_image(fig, format='png', engine='kaleido', scale=2.0)  # Higher DPI for better quality
+                        
+                        # Create BytesIO object for the image
+                        img_buffer = BytesIO(img_bytes)
+                        
+                        # Add plot title and description
+                        story.append(Paragraph(plot.get('title', 'Untitled Plot'), styles['Heading3']))
+                        if plot.get('description'):
+                            story.append(Paragraph(plot.get('description'), normal_style))
+                        
+                        # Add plot image with automatic scaling
+                        logger.info("Adding image to PDF")
+                        story.append(Image(img_buffer, width=6*inch, height=4*inch))
+                        story.append(Spacer(1, 24))
+                except Exception as e:
+                    logger.error(f"Error processing plot {i+1}: {str(e)}")
+                    raise
+            
+            # Build the PDF
+            logger.info("Building PDF")
+            doc.build(story)
+            
+            # Get the PDF content
+            pdf_content = buffer.getvalue()
+            buffer.close()
+            
+            # Create response
+            response = HttpResponse(pdf_content, content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="{analysis.title}.pdf"'
+            logger.info("PDF generation successful")
             return response
+            
         except Analysis.DoesNotExist:
+            logger.error(f"Analysis not found with ID: {analysis_id}")
             return Response({"error": "Analysis not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
+            logger.error(f"Error generating PDF: {str(e)}")
+            logger.error(f"Error type: {type(e)}")
+            logger.error(f"Error args: {e.args}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
