@@ -216,13 +216,7 @@ const SavedAnalysis = () => {
                     </div>
                   </div>
                   <div className="flex space-x-3">
-                    <button
-                      onClick={() => handleDownload(analysis.id, analysis.title)}
-                      className="inline-flex items-center p-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-                      title="Download PDF"
-                    >
-                      <DownloadCloud className="h-4 w-4" />
-                    </button>
+                    
                     <Link
                       to={`/edit-analysis/${analysis.id}`}
                       className="inline-flex items-center p-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"

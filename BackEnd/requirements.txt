@@ -23,3 +23,5 @@ tzdata==2025.2
 wheel==0.45.1
 kaleido==0.2.1
 python-dotenv==1.0.1
+locust==2.16.1
+requests==2.31.0

@@ -17,6 +17,19 @@ def main():
         ) from exc
     execute_from_command_line(sys.argv)
 
+def reset_database():
+    """Delete the existing database and create a new one."""
+    db_path = os.path.join(os.path.dirname(__file__), 'db.sqlite3')
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        print("Database deleted successfully.")
+    else:
+        print("No database found to delete.")
+    os.system('python manage.py migrate')
+    print("New database created successfully.")
 
 if __name__ == '__main__':
-    main()
+    if len(sys.argv) > 1 and sys.argv[1] == 'reset_db':
+        reset_database()
+    else:
+        main()

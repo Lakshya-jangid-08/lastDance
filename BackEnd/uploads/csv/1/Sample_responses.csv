@@ -1,0 +1,51 @@
+ID,Age,Score1,Score2,Balance,Name,City,Department,Status
+1,26,88,97,2527.2,Paula,Denver,Marketing,Active
+2,34,82,91,2964.17,Ethan,San Diego,IT,Active
+3,37,72,92,4536.22,Kevin,New York,IT,Inactive
+4,36,88,87,1794.77,Fiona,Austin,Marketing,Active
+5,29,99,63,2590.35,Ian,Seattle,Operations,On Leave
+6,22,72,91,1781.92,Ian,Seattle,Support,Inactive
+7,22,89,64,3354.79,Nina,Austin,Finance,Inactive
+8,27,97,97,4471.85,Kevin,Chicago,IT,On Leave
+9,27,65,62,4796.08,Jade,Boston,Support,Active
+10,23,68,87,4210.67,Oscar,Miami,Marketing,On Leave
+11,23,63,67,3993.52,Bob,Dallas,Finance,Inactive
+12,26,89,61,4490.55,Paula,Dallas,Marketing,Active
+13,41,89,91,1825.59,Hannah,Seattle,IT,Active
+14,35,75,99,4815.62,Paula,Miami,Finance,Active
+15,25,96,60,3885.17,Paula,Miami,Operations,On Leave
+16,38,65,96,3508.98,Kevin,Dallas,IT,On Leave
+17,30,90,75,1338.36,Dana,Chicago,IT,Active
+18,30,91,92,2447.67,Hannah,Seattle,HR,On Leave
+19,34,98,71,3075.75,George,Atlanta,HR,On Leave
+20,23,90,86,1525.71,George,Seattle,Finance,On Leave
+21,42,97,97,3985.75,Paula,Denver,HR,On Leave
+22,31,94,84,1060.06,Hannah,Atlanta,Operations,Active
+23,27,82,64,1924.52,Paula,Dallas,Support,Active
+24,29,73,62,4829.39,Oscar,Dallas,Operations,On Leave
+25,28,85,84,1032.76,Bob,Boston,HR,Inactive
+26,43,96,94,4699.63,Oscar,Denver,Operations,Inactive
+27,44,75,64,3776.58,Ian,Austin,Support,Inactive
+28,34,74,89,4758.14,Fiona,Dallas,Support,Inactive
+29,31,98,71,1758.35,Fiona,Denver,Marketing,On Leave
+30,22,72,91,2374.05,Bob,Dallas,Sales,On Leave
+31,43,64,85,2256.76,Hannah,San Diego,Support,Active
+32,34,78,60,1025.05,Fiona,San Diego,Sales,On Leave
+33,26,84,60,3265.31,Laura,Boston,IT,On Leave
+34,32,64,91,2641.63,Ethan,Miami,Support,On Leave
+35,44,69,87,1109.29,Laura,Denver,Sales,On Leave
+36,38,88,88,1738.7,Mike,Chicago,HR,Inactive
+37,33,62,63,3923.41,Dana,Boston,IT,Active
+38,22,90,89,3856.93,Hannah,Austin,Marketing,Active
+39,33,68,69,3544.96,George,Dallas,Marketing,On Leave
+40,37,61,86,3958.84,Fiona,Chicago,HR,On Leave
+41,24,93,92,2455.15,Nina,Boston,Sales,Inactive
+42,44,63,84,1018.9,Hannah,Boston,IT,Active
+43,39,99,64,3216.01,Ethan,Austin,Finance,Active
+44,41,98,91,4226.71,Jade,New York,Marketing,Inactive
+45,27,86,81,4653.32,Nina,Seattle,HR,On Leave
+46,25,96,99,4854.37,Mike,Chicago,Sales,Inactive
+47,40,90,64,4370.62,Kevin,Denver,Operations,Inactive
+48,35,86,90,4127.28,Paula,Chicago,Support,On Leave
+49,31,95,80,3273.88,Hannah,Atlanta,HR,Active
+50,40,85,69,1645.48,Charlie,Miami,Finance,Inactive
