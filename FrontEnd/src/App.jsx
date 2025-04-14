@@ -14,8 +14,10 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import SurveyAnalyzer from './pages/SurveyAnalyzer';
 import EditAnalysis from './pages/EditAnalysis';
+import SavedAnalysis from './pages/SavedAnalysis';
 import OrganizationSurveys from './pages/surveys/OrganizationSurveys';
 import Notification from './pages/notifications/Notification';
+import ProfilePage from './pages/profile/ProfilePage';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -73,6 +75,8 @@ function App() {
             <Route path="surveys/:id/edit" element={<SurveyEdit />} />
             <Route path="surveys/:id/responses" element={<SurveyResponses />} />
             <Route path="survey-analyzer" element={<SurveyAnalyzer />} />
+            <Route path="saved-analyses" element={<SavedAnalysis />} />
+            <Route path="profile" element={<ProfilePage />} />
             <Route
               path="organization-surveys"
               element={

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { ClipboardList, Home, BarChart3, LogOut, Bell } from 'lucide-react';
+import { ClipboardList, Home, BarChart3, LogOut, Bell, User, Save } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Layout = () => {
@@ -47,14 +47,28 @@ const Layout = () => {
                   to="/dashboard/survey-analyzer"
                   className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
                 >
-                  <ClipboardList className="h-4 w-4 mr-1" />
+                  <BarChart3 className="h-4 w-4 mr-1" />
                   Open Analyzer
+                </Link>
+                <Link
+                  to="/dashboard/saved-analyses"
+                  className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900"
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  Saved Analyses
                 </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Link to="/notifications">
-                <Bell className="h-6 w-6 hover:text-gray-400" />
+              <Link to="/notifications" className="text-gray-500 hover:text-gray-700">
+                <Bell className="h-6 w-6" />
+              </Link>
+              <Link to="/dashboard/profile" className="text-gray-500 hover:text-gray-700">
+                <div className="flex items-center">
+                  <div className="bg-indigo-100 rounded-full p-1">
+                    <User className="h-5 w-5 text-indigo-600" />
+                  </div>
+                </div>
               </Link>
               <button
                 onClick={handleLogout}
