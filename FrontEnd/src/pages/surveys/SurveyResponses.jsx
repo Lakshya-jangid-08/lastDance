@@ -244,7 +244,6 @@ const SurveyResponses = () => {
             <tr>
               <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">Response ID</th>
               <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">Submitted At</th>
-              <th className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">Respondent</th>
               {survey.questions.map((question) => (
                 <th key={question.id} className="border border-gray-300 px-4 py-2 text-left text-sm font-medium text-gray-700">
                   {question.text}
@@ -257,9 +256,7 @@ const SurveyResponses = () => {
               <tr key={response.id}>
                 <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{response.id}</td>
                 <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">{formatDate(response.submitted_at)}</td>
-                <td className="border border-gray-300 px-4 py-2 text-sm text-gray-700">
-                  {response.respondent ? response.respondent.email : 'Anonymous'}
-                </td>
+               
                 {survey.questions.map((question) => {
                   const answer = response.answers.find((a) => a.question === question.id);
                   return (
