@@ -59,7 +59,25 @@ const Register = () => {
         navigate('/login');
       }
     } catch (error) {
-      setError(error.response?.data?.detail || 'Registration failed');
+      if (error.response?.status === 400) {
+        const errorDetails = error.response.data;
+        console.error('Registration failed:', errorDetails);
+
+        // Display specific error messages to the user
+        if (errorDetails.username) {
+          setError(`Username error: ${errorDetails.username.join(' ')}`);
+        } else if (errorDetails.email) {
+          setError(`Email error: ${errorDetails.email.join(' ')}`);
+        } else if (errorDetails.password) {
+          setError(`Password error: ${errorDetails.password.join(' ')}`);
+        } else if (errorDetails.organization_id) {
+          setError(`Organization error: ${errorDetails.organization_id.join(' ')}`);
+        } else {
+          setError('Registration failed. Please check your input and try again.');
+        }
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
@@ -176,4 +194,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;

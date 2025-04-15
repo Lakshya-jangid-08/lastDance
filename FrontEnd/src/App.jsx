@@ -53,7 +53,11 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/survey-response/:creatorId/:surveyId" element={<SurveyResponse />} />
+          <Route path="/survey-response/:creatorId/:surveyId" element={
+            <ProtectedRoute>
+              <SurveyResponse />
+            </ProtectedRoute>
+            } />
           <Route path="/thank-you" element={<ThankYou />} />
           
           {/* Root route */}
@@ -86,7 +90,11 @@ function App() {
               }
             />
           </Route>
-          <Route path="/edit-analysis/:id" element={<EditAnalysis />} />
+          <Route path="/edit-analysis/:id" element={
+            <ProtectedRoute>
+              <EditAnalysis />
+            </ProtectedRoute>
+            } />
           <Route path="/notifications" element={<Notification />} />
         </Routes>
       </Router>
