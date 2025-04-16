@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Edit, DownloadCloud, Trash2 } from 'lucide-react';
+import { Edit, DownloadCloud, Trash2, FileText } from 'lucide-react';
 import Plot from 'react-plotly.js';
 
 const SavedAnalysis = () => {
@@ -101,6 +101,107 @@ const SavedAnalysis = () => {
     } catch (err) {
       console.error('Error downloading analysis:', err);
       setError('Failed to download analysis. Please try again.');
+    }
+  };
+
+  const handleHtmlDownload = async (analysis) => {
+    try {
+      // Generate HTML content
+      let htmlContent = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${analysis.title}</title>
+            <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    padding: 20px;
+                }
+                .header {
+                    border-bottom: 1px solid #eaeaea;
+                    padding-bottom: 20px;
+                    margin-bottom: 20px;
+                }
+                .plot-container {
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    border: 1px solid #eaeaea;
+                    border-radius: 5px;
+                    background-color: #fff;
+                }
+                h1 { color: #2c5282; margin-bottom: 10px; }
+                h2 { color: #2d3748; margin-bottom: 15px; }
+                h3 { color: #4a5568; }
+                .meta { color: #718096; font-size: 0.9em; margin-bottom: 10px; }
+                .description { margin-bottom: 20px; }
+                .plot { width: 100%; height: 450px; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>${analysis.title}</h1>
+                <div class="meta">
+                    <p>Author: ${analysis.author_name}</p>
+                    <p>Date: ${formatDate(analysis.created_at)}</p>
+                </div>
+                ${analysis.description ? `<div class="description">${analysis.description}</div>` : ''}
+            </div>
+            <h2>Plots</h2>
+      `;
+
+      // Add each plot to HTML
+      if (analysis.plots && analysis.plots.length > 0) {
+        analysis.plots.forEach((plot, index) => {
+          if (plot.data) {
+            const plotId = `plot-${index}`;
+            const plotData = JSON.stringify(plot.data.data);
+            const plotLayout = JSON.stringify({
+              ...plot.data.layout,
+              autosize: true,
+              height: 450,
+              margin: { l: 50, r: 50, t: 50, b: 50 },
+              title: plot.title
+            });
+
+            htmlContent += `
+              <div class="plot-container">
+                <h3>${plot.title || 'Untitled Plot'}</h3>
+                ${plot.description ? `<div class="description">${plot.description}</div>` : ''}
+                <div id="${plotId}" class="plot"></div>
+                <script>
+                  Plotly.newPlot('${plotId}', ${plotData}, ${plotLayout}, {responsive: true});
+                </script>
+              </div>
+            `;
+          }
+        });
+      } else {
+        htmlContent += `<p>No plots available</p>`;
+      }
+
+      // Close the HTML document
+      htmlContent += `
+            </body>
+        </html>
+      `;
+
+      // Create and download the HTML file
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.download = `${analysis.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.html`;
+      link.click();
+      window.URL.revokeObjectURL(link.href);
+    } catch (err) {
+      console.error('Error generating HTML:', err);
+      setError('Failed to generate HTML. Please try again.');
     }
   };
 
@@ -224,6 +325,13 @@ const SavedAnalysis = () => {
                     >
                       <Edit className="h-4 w-4" />
                     </Link>
+                    <button
+                      onClick={() => handleHtmlDownload(analysis)}
+                      className="inline-flex items-center p-2 border border-green-300 rounded-md text-sm font-medium text-green-700 bg-white hover:bg-green-50"
+                      title="Download HTML"
+                    >
+                      <FileText className="h-4 w-4" />
+                    </button>
                     <button
                       onClick={() => handleDelete(analysis.id)}
                       className="inline-flex items-center p-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-white hover:bg-red-50"
